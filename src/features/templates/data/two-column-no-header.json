@@ -1,0 +1,157 @@
+{
+  "schemaVersion": "1.0",
+  "id": "fresh-two-column-no-header",
+  "name": "Fresh Two Column",
+  "description": "A flexible two-column CV template without a default header. Header, avatar, column widths, section visibility, and section regions can be changed later in the editor.",
+  "category": "modern",
+  "atsLevel": "balanced",
+  "layout": {
+    "defaultType": "two-column",
+    "allowedTypes": [
+      "single-column",
+      "single-column-with-header",
+      "two-column",
+      "two-column-with-header"
+    ],
+    "header": {
+      "supported": true,
+      "defaultEnabled": false,
+      "locked": false
+    },
+    "columns": [
+      {
+        "id": "main",
+        "label": "Main",
+        "width": 64,
+        "minWidth": 30,
+        "maxWidth": 70
+      },
+      {
+        "id": "side",
+        "label": "Side",
+        "width": 36,
+        "minWidth": 30,
+        "maxWidth": 70
+      }
+    ]
+  },
+  "avatar": {
+    "supported": true,
+    "defaultVisible": false,
+    "userToggleable": true,
+    "atsRecommended": false
+  },
+  "theme": {
+    "primary": "#38A66B",
+    "backgroundMode": "soft-tint",
+    "backgroundTintOpacity": 0.06,
+    "fontPair": {
+      "display": "Newsreader Variable",
+      "body": "Instrument Sans Variable"
+    }
+  },
+  "sections": {
+    "lockedTop": ["profile", "headline", "contact"],
+    "customDisplays": [
+      "plain",
+      "timeline",
+      "bullet-list",
+      "achievement-list",
+      "portfolio-list",
+      "tag-cloud"
+    ],
+    "slots": [
+      {
+        "type": "profile",
+        "title": "Profile",
+        "region": "main",
+        "defaultVisible": true,
+        "locked": true,
+        "draggable": false,
+        "display": "plain"
+      },
+      {
+        "type": "contact",
+        "title": "Contact",
+        "region": "side",
+        "defaultVisible": true,
+        "locked": true,
+        "draggable": false,
+        "display": "plain"
+      },
+      {
+        "type": "summary",
+        "title": "Summary",
+        "region": "main",
+        "defaultVisible": true,
+        "draggable": true,
+        "display": "plain"
+      },
+      {
+        "type": "experience",
+        "title": "Experience",
+        "region": "main",
+        "defaultVisible": true,
+        "draggable": true,
+        "display": "timeline"
+      },
+      {
+        "type": "projects",
+        "title": "Projects",
+        "region": "main",
+        "defaultVisible": true,
+        "draggable": true,
+        "display": "portfolio-list"
+      },
+      {
+        "type": "skills",
+        "title": "Skills",
+        "region": "side",
+        "defaultVisible": true,
+        "draggable": true,
+        "display": "tag-cloud"
+      },
+      {
+        "type": "education",
+        "title": "Education",
+        "region": "side",
+        "defaultVisible": true,
+        "draggable": true,
+        "display": "plain"
+      },
+      {
+        "type": "certifications",
+        "title": "Certifications",
+        "region": "side",
+        "defaultVisible": false,
+        "draggable": true,
+        "display": "bullet-list"
+      },
+      {
+        "type": "languages",
+        "title": "Languages",
+        "region": "side",
+        "defaultVisible": true,
+        "draggable": true,
+        "display": "bullet-list"
+      },
+      {
+        "type": "custom",
+        "title": "Highlights",
+        "region": "side",
+        "defaultVisible": true,
+        "draggable": true,
+        "display": "achievement-list"
+      }
+    ]
+  },
+  "atsGuidance": {
+    "risk": "medium",
+    "notes": [
+      "Two-column layouts are visually useful but less ATS-safe than single-column layouts.",
+      "Keep important identity fields near the top.",
+      "Export should remain text-selectable and avoid image-only PDF output.",
+      "Avatar is disabled by default for this theme but can be enabled by the user."
+    ]
+  }
+}
