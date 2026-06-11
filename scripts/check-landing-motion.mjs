@@ -50,6 +50,10 @@ const forbidden = [
     pattern: /template-preview-stack[^\n]*min-h-\[218px\]/
   },
   {
+    label: "phase 4 eye-door template reveal",
+    pattern: /template-door-top|template-door-bottom|template-door-height-open/
+  },
+  {
     label: "visible zero phase label",
     pattern: />\s*Phase 0\b|>\s*phase 0\b/
   },
@@ -157,18 +161,22 @@ const requiredMarkers = [
   "phase-two-template-browser",
   "template-list-item",
   "template-preview-stack",
+  "template-preview-layer",
+  "template-preview-card-box",
   "template-preview-card-front",
   "template-preview-card-back",
   "template-mock-cv-back",
+  "template-preview-slide-reveal",
+  "template-preview-scan-line",
   "template-card-back-offset",
   "template-card-front-offset",
-  "template-door-top",
-  "template-door-bottom",
-  "template-door-height-open",
   "phase-two-active-template",
   "phase-two-responsive-grid",
   "phase-two-preview-column",
+  "phase-two-preview-group",
+  "phase-two-preview-lift",
   "phase-two-template-list",
+  "phase-four-compose-lift",
   "phase-three-content",
   "width-left-half",
   "width-right-half",
@@ -189,6 +197,21 @@ const requiredMarkers = [
 
 const failures = [];
 const requiredDomClassMarkers = ["green-card-mask"];
+const requiredStyleMarkers = [
+  {
+    label: "phase 4 combined slide reveal and card offset animations",
+    marker: ".template-preview-slide-reveal.template-card-front-offset"
+  }
+];
+
+const cardOffsetTransforms = {
+  front: styles.match(
+    /@keyframes template-card-front-offset[\s\S]*?100%\s*\{[\s\S]*?transform:\s*translate3d\(\s*(-?\d+)(?:px)?\s*,\s*(-?\d+)px\s*,\s*0\s*\)/
+  ),
+  back: styles.match(
+    /@keyframes template-card-back-offset[\s\S]*?100%\s*\{[\s\S]*?transform:\s*translate3d\(\s*(-?\d+)px\s*,\s*(-?\d+)px\s*,\s*0\s*\)/
+  )
+};
 
 const preloadGuardChecks = [
   {
@@ -245,6 +268,33 @@ for (const marker of requiredDomClassMarkers) {
 
   if (!classNamePattern.test(source)) {
     failures.push(`GSAP target .${marker} must be present in a JSX className, not only in timeline selectors.`);
+  }
+}
+
+for (const item of requiredStyleMarkers) {
+  if (!styles.includes(item.marker)) {
+    failures.push(`Missing required landing motion style: ${item.label}.`);
+  }
+}
+
+if (!cardOffsetTransforms.front || !cardOffsetTransforms.back) {
+  failures.push("Phase 4 template card offset keyframes should expose final translate3d offsets.");
+} else {
+  const frontOffsetY = Number(cardOffsetTransforms.front[2]);
+  const backOffsetX = Number(cardOffsetTransforms.back[1]);
+  const backOffsetY = Number(cardOffsetTransforms.back[2]);
+  const verticalSeparation = Math.abs(frontOffsetY - backOffsetY);
+
+  if (frontOffsetY > 14) {
+    failures.push("Phase 4 front template card should not drop far enough to make the back mock CV read shorter.");
+  }
+
+  if (verticalSeparation > 24) {
+    failures.push("Phase 4 front/back template offsets should keep the two full-size CV layers visually balanced.");
+  }
+
+  if (backOffsetX > 24) {
+    failures.push("Phase 4 back template card should not sit so far right that only a narrow sliver reads as the second CV.");
   }
 }
 
@@ -442,6 +492,14 @@ if (greenCardSetMotion?.[0].includes("rotate")) {
   failures.push("Phase 2 preview should start upright and must not set rotate on .green-card-mask.");
 }
 
+if (greenCardSetMotion) {
+  const greenCardY = greenCardSetMotion[0].match(/y:\s*(\d+)/);
+
+  if (!greenCardY || Number(greenCardY[1]) > 28) {
+    failures.push("Phase 4 preview reveal should not start so low that it clips against the scene bottom.");
+  }
+}
+
 if (greenCardRevealMotion?.[0].includes("rotate")) {
   failures.push("Phase 2 preview reveal should stay upright and must not animate rotate on .green-card-mask.");
 }
@@ -599,9 +657,53 @@ const previewStackBlock = source.match(
   /function TemplatePreviewStack[\s\S]*?function PhaseSplit/
 );
 
+const phaseGreenBlock = source.match(
+  /function PhaseGreen[\s\S]*?function TemplatePreviewStack/
+);
+
 const welcomeInspirationBlock = source.match(
   /function WelcomeInspiration[\s\S]*?function ColorFillText/
 );
+
+if (!phaseGreenBlock) {
+  failures.push("Missing Phase 4 compose implementation block.");
+} else {
+  const phaseGreenSource = phaseGreenBlock[0];
+  const titleWrap = phaseGreenSource.match(/green-title-wrap[^"]*/);
+  const browserGrid = phaseGreenSource.match(/phase-two-template-browser[^"]*/);
+
+  if (!titleWrap || !titleWrap[0].includes("top-[clamp(")) {
+    failures.push("Phase 4 title should use a clamp top offset so it stays below the fixed header.");
+  }
+
+  if (titleWrap?.[0].includes("-translate-y-1/2")) {
+    failures.push("Phase 4 title should not center itself upward with -translate-y-1/2.");
+  }
+
+  if (!browserGrid || !browserGrid[0].includes("lg:bottom-[clamp(")) {
+    failures.push("Phase 4 template browser should keep desktop bottom breathing room.");
+  }
+
+  if (!browserGrid || !browserGrid[0].includes("phase-four-compose-lift") || !browserGrid[0].includes("-translate-y-[clamp(")) {
+    failures.push("Phase 4 compose browser should lift the full preview, active copy, and template list together.");
+  }
+
+  if (!/phase-two-responsive-grid[^"]*lg:max-h-\[min\(/.test(phaseGreenSource)) {
+    failures.push("Phase 4 template browser should use a non-negative viewport-aware desktop max height.");
+  }
+
+  if (!/phase-two-preview-group[^"]*phase-two-preview-lift/.test(phaseGreenSource)) {
+    failures.push("Phase 4 preview and active template copy should be lifted as a scoped group.");
+  }
+
+  if (/phase-two-preview-group[^"]*-translate-y-\[clamp\(/.test(phaseGreenSource)) {
+    failures.push("Phase 4 preview group should not be the only lifted column; lift the full browser/list instead.");
+  }
+
+  if (/Hover a template name to inspect the visual direction/.test(phaseGreenSource)) {
+    failures.push("Phase 4 should not render the hover helper copy inside the compose scene because it can overlap the title.");
+  }
+}
 
 if (previewStackBlock) {
   const previewSource = previewStackBlock[0];
@@ -620,6 +722,118 @@ if (previewStackBlock) {
 
   if (previewSource.includes("template-preview-overlay")) {
     failures.push("Template preview should not include a full dark overlay layer.");
+  }
+
+  if (!/template-preview-stack[^"]*aspect-\[4\/5\]/.test(previewSource)) {
+    failures.push("Template preview stack should use the same 4/5 aspect ratio as the phase 4 CV preview image.");
+  }
+
+  if (/template-preview-stack[^"]*aspect-\[3\/4\]/.test(previewSource)) {
+    failures.push("Template preview stack should not use the narrower 3/4 ratio because the mock back card reads smaller than the image.");
+  }
+
+  if (/template-preview-stack[^"]*(?:h|lg:h)-\[/.test(previewSource)) {
+    failures.push("Template preview stack should not use fixed height utilities; aspect ratio should determine card height.");
+  }
+
+  if (/template-preview-stack[^"]*lg:max-h-\[calc\(100dvh-34rem\)\]/.test(previewSource)) {
+    failures.push("Template preview stack should not use a desktop max-height that can become negative in short viewports.");
+  }
+
+  if (!/template-preview-stack[^"]*lg:max-w-\[min\(230px,32dvh\)\]/.test(previewSource)) {
+    failures.push("Phase 4 preview cards should stay compact enough for short desktop viewport bounds.");
+  }
+
+  if (!/className="(?=[^"]*template-preview-card-back)(?=[^"]*template-preview-layer)[^"]*"/.test(previewSource)) {
+    failures.push("Phase 4 mock back card should use the shared preview layer sizing class.");
+  }
+
+  if (!/className="(?=[^"]*template-preview-card-front)(?=[^"]*template-preview-layer)[^"]*"/.test(previewSource)) {
+    failures.push("Phase 4 front image card should use the shared preview layer sizing class.");
+  }
+
+  if (!/className="(?=[^"]*template-preview-card-back)(?=[^"]*template-preview-card-box)[^"]*"/.test(previewSource)) {
+    failures.push("Phase 4 mock back card should use the shared visible card box, not the full offset stage.");
+  }
+
+  if (!/className="(?=[^"]*template-preview-card-front)(?=[^"]*template-preview-card-box)[^"]*"/.test(previewSource)) {
+    failures.push("Phase 4 front image card should use the shared visible card box, not the full offset stage.");
+  }
+
+  if (!/template-preview-card-box[^"]*aspect-\[3\/4\]/.test(previewSource)) {
+    failures.push("Phase 4 visible preview cards should use a shared 3/4 CV page ratio inside the larger offset stage.");
+  }
+
+  if (!/template-preview-card-box[^"]*bottom-4/.test(previewSource)) {
+    failures.push("Phase 4 visible preview cards should be bottom-anchored so the back card offset ends above the front card.");
+  }
+
+  if (!/template-preview-card-box[^"]*w-\[calc\(100%-1\.5rem\)\]/.test(previewSource)) {
+    failures.push("Phase 4 visible preview cards should leave horizontal runway for the back card to extend right.");
+  }
+
+  if (/template-preview-card-(?:front|back)[^"]*inset-0/.test(previewSource)) {
+    failures.push("Phase 4 preview cards should not use inset-0 because that makes the back layer as tall as the offset stage.");
+  }
+
+  if (/template-preview-card-(?:front|back)[^"]*size-full/.test(previewSource)) {
+    failures.push("Phase 4 preview cards should not use size-full; the shared visible card box controls their dimensions.");
+  }
+
+  const frontCardClass = previewSource.match(
+    /className="(?=[^"]*template-preview-card-front)([^"]*)"/
+  )?.[1];
+
+  if (!frontCardClass) {
+    failures.push("Phase 4 front image card should expose a className for visual shell checks.");
+  } else {
+    if (/\bbg-white\b/.test(frontCardClass) || /\bborder\b/.test(frontCardClass)) {
+      failures.push("Phase 4 front image card should not paint a larger white shell around the object-contained CV image.");
+    }
+
+    if (/shadow-/.test(frontCardClass)) {
+      failures.push("Phase 4 front image card shadow should live on the visible CV image, not the larger transparent stage.");
+    }
+  }
+
+  const backCardClass = previewSource.match(
+    /className="(?=[^"]*template-preview-card-back)([^"]*)"/
+  )?.[1];
+
+  if (!backCardClass || !/\boverflow-hidden\b/.test(backCardClass)) {
+    failures.push("Phase 4 back mock card should clip its generated CV contents so no loose pills show below the stack.");
+  }
+
+  if (/template-preview-card-front[^"]*overflow-hidden/.test(previewSource)) {
+    failures.push("Phase 4 front image card should not use overflow-hidden because it crops the CV image and shadow.");
+  }
+
+  if (/template-preview-image[^"]*\bbg-white\b/.test(previewSource)) {
+    failures.push("Phase 4 front image wrapper should stay transparent so it does not cover the back mock CV.");
+  }
+
+  if (!/<img[\s\S]*className="[^"]*\bdrop-shadow-\[/.test(previewSource)) {
+    failures.push("Phase 4 front CV image should carry the preview shadow on the visible bitmap.");
+  }
+
+  if (/template-preview-image[^"]*overflow-hidden/.test(previewSource)) {
+    failures.push("Phase 4 preview image stage should not use overflow-hidden; object-contain and aspect ratio should preserve the full CV.");
+  }
+
+  if (!/template-preview-card-front[^"]*template-preview-slide-reveal/.test(previewSource)) {
+    failures.push("Template preview should use the new slide reveal animation on template changes.");
+  }
+
+  if (!/template-preview-scan-line/.test(previewSource)) {
+    failures.push("Template preview should include a scan line accent instead of the old eye-door reveal.");
+  }
+
+  if (!/className="(?=[^"]*template-mock-cv-back)(?=[^"]*template-preview-layer)(?=[^"]*size-full)[^"]*"/.test(previewSource)) {
+    failures.push("MiniCvMock should fill the shared phase 4 preview layer instead of sizing itself independently.");
+  }
+
+  if (/template-mock-cv-back[^"]*aspect-\[/.test(previewSource)) {
+    failures.push("MiniCvMock should not declare its own aspect ratio; the parent preview stack controls it.");
   }
 
   if (/background CV preview/.test(previewSource)) {

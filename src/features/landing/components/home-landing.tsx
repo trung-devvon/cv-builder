@@ -245,7 +245,7 @@ export function HomeLanding() {
           borderRadius: 54
         });
         gsap.set(".green-card-mask", {
-          y: 72
+          y: 24
         });
         gsap.set(".width-reveal-copy", {
           xPercent: -18
@@ -1082,7 +1082,7 @@ function PhaseGreen({
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(224,177,91,0.34),transparent_30%),radial-gradient(circle_at_82%_74%,rgba(57,168,107,0.38),transparent_32%)]" />
         <div className="absolute left-[-9rem] top-[-9rem] h-[34rem] w-[34rem] rounded-full bg-[#39a86b]/28 blur-3xl" />
 
-        <div className="center-stage-copy green-title-wrap absolute left-1/2 top-[16%] z-10 w-[min(92vw,820px)] -translate-x-1/2 -translate-y-1/2 text-center sm:top-[20%] lg:top-[18%]">
+        <div className="center-stage-copy green-title-wrap absolute left-1/2 top-[clamp(6.75rem,17dvh,9rem)] z-10 w-[min(92vw,820px)] -translate-x-1/2 text-center sm:top-[clamp(7.25rem,17dvh,9.75rem)] lg:top-[clamp(7.5rem,16dvh,9.5rem)]">
           <p className="green-copy-mask text-xs font-black uppercase tracking-[0.18em] text-[#e0b15b] sm:text-sm">
             Phase 04 / compose
           </p>
@@ -1094,8 +1094,8 @@ function PhaseGreen({
           </h2>
         </div>
 
-        <div className="phase-two-template-browser phase-two-responsive-grid pointer-events-auto absolute inset-x-4 bottom-4 z-10 grid max-h-[55dvh] grid-cols-[minmax(0,0.54fr)_minmax(0,0.46fr)] items-end gap-3 sm:inset-x-8 sm:bottom-7 sm:max-h-[58dvh] sm:gap-5 md:grid-cols-[minmax(17rem,0.84fr)_minmax(16rem,0.62fr)] lg:bottom-0 lg:inset-x-12 lg:max-h-none lg:grid-cols-[minmax(18rem,0.84fr)_minmax(18rem,0.74fr)] lg:gap-8">
-          <div className="bottom-left-copy grid min-w-0 gap-2 sm:gap-4 lg:grid-cols-[minmax(13rem,0.58fr)_minmax(13rem,0.42fr)] lg:items-end lg:gap-6">
+        <div className="phase-two-template-browser phase-two-responsive-grid phase-four-compose-lift pointer-events-auto absolute inset-x-4 bottom-[clamp(4rem,8dvh,6rem)] z-10 grid max-h-[44dvh] -translate-y-[clamp(1.25rem,4dvh,3rem)] grid-cols-[minmax(0,0.54fr)_minmax(0,0.46fr)] items-end gap-3 sm:inset-x-8 sm:bottom-[clamp(4.5rem,9dvh,6.5rem)] sm:max-h-[48dvh] sm:-translate-y-[clamp(1.5rem,4.5dvh,3.25rem)] sm:gap-5 md:grid-cols-[minmax(17rem,0.84fr)_minmax(16rem,0.62fr)] lg:bottom-[clamp(5rem,10dvh,7.5rem)] lg:inset-x-12 lg:max-h-[min(52dvh,25rem)] lg:-translate-y-[clamp(1.25rem,4dvh,3.5rem)] lg:grid-cols-[minmax(18rem,0.84fr)_minmax(18rem,0.74fr)] lg:gap-8">
+          <div className="bottom-left-copy phase-two-preview-group phase-two-preview-lift grid min-w-0 gap-2 sm:gap-4 lg:grid-cols-[minmax(13rem,0.58fr)_minmax(13rem,0.42fr)] lg:items-end lg:gap-6">
             <div className="phase-two-preview-column green-card-mask">
               <TemplatePreviewStack card={activeTemplate} />
             </div>
@@ -1115,16 +1115,12 @@ function PhaseGreen({
           </div>
 
           <div className="bottom-right-copy min-w-0 justify-self-stretch md:justify-self-end">
-            <div className="green-copy-mask mb-4 hidden max-w-[24rem] text-right text-xs leading-5 text-white/58 md:block lg:text-sm lg:leading-6">
-              Hover a template name to inspect the visual direction. The list is
-              intentionally short, with more templates implied.
-            </div>
             <div className="phase-two-template-list flex w-full min-w-0 flex-col items-stretch gap-1 text-right sm:gap-2 md:w-[min(38vw,26rem)]">
               {templateImageCards.map((card, index) => (
                 <button
                   key={card.name}
                   className={cn(
-                    "template-list-item group/list flex min-w-0 items-baseline justify-end gap-2 py-1 text-right font-[var(--font-display)] text-[clamp(1.1rem,5.9vw,2rem)] leading-[0.95] text-white transition-colors duration-300 hover:text-[#e0b15b] sm:gap-3 sm:py-1.5 sm:text-[clamp(1.8rem,4.8vw,2.6rem)] lg:text-[48px]",
+                    "template-list-item group/list flex min-w-0 items-baseline justify-end gap-2 py-1 text-right font-[var(--font-display)] text-[clamp(1.1rem,5.9vw,2rem)] leading-[0.95] text-white transition-colors duration-300 hover:text-[#e0b15b] sm:gap-3 sm:py-1.5 sm:text-[clamp(1.8rem,4.8vw,2.6rem)] lg:text-[clamp(2rem,5dvh,3rem)]",
                     index === activeTemplateIndex && "phase-two-active-template text-[#e0b15b]"
                   )}
                   onFocus={() => onSelectTemplate(index)}
@@ -1137,7 +1133,7 @@ function PhaseGreen({
                   </span>
                 </button>
               ))}
-              <div className="template-list-item pt-1 font-[var(--font-display)] text-[clamp(1.8rem,7vw,3rem)] leading-none text-white/45">
+              <div className="template-list-item pt-1 font-[var(--font-display)] text-[clamp(1.8rem,7vw,3rem)] leading-none text-white/45 lg:text-[clamp(1.8rem,5dvh,3rem)]">
                 ...
               </div>
             </div>
@@ -1154,25 +1150,24 @@ function TemplatePreviewStack({
   card: (typeof templateImageCards)[number];
 }) {
   return (
-    <div className="template-preview-stack relative min-h-[clamp(8.5rem,32dvh,13.5rem)] overflow-visible sm:min-h-[clamp(13rem,34dvh,18.75rem)] lg:min-h-[304px]">
-      <div className="template-preview-card-back template-card-back-offset absolute left-0 top-0 z-0 w-[82%] max-w-[clamp(7rem,34vw,13rem)] overflow-hidden border border-white/18 bg-white shadow-xl shadow-black/18 sm:w-[66%] sm:max-w-[258px] lg:max-w-[286px]">
+    <div className="template-preview-stack relative aspect-[4/5] w-[74%] max-w-[clamp(6.25rem,28vw,11rem)] overflow-visible sm:w-[58%] sm:max-w-[210px] lg:max-w-[min(230px,32dvh)]">
+      <div className="template-preview-layer template-preview-card-box template-preview-card-back template-card-back-offset absolute bottom-4 left-0 z-0 aspect-[3/4] w-[calc(100%-1.5rem)] overflow-hidden border border-white/18 bg-white shadow-xl shadow-black/18">
         <MiniCvMock accent={card.accent} title={card.role} />
       </div>
 
       <div
         key={card.name}
-        className="template-preview-card-front template-card-front-offset absolute left-0 top-0 z-10 w-[82%] max-w-[clamp(7rem,34vw,13rem)] overflow-hidden border border-white/26 bg-white shadow-[0_18px_42px_rgba(0,0,0,0.20)] sm:w-[66%] sm:max-w-[258px] lg:max-w-[286px]"
+        className="template-preview-layer template-preview-card-box template-preview-card-front template-preview-slide-reveal template-card-front-offset absolute bottom-4 left-0 z-10 aspect-[3/4] w-[calc(100%-1.5rem)] overflow-visible"
       >
-        <div className="template-preview-image aspect-[3/4] overflow-hidden bg-white">
+        <div className="template-preview-image size-full">
           <img
             alt={`${card.name} CV template preview`}
-            className="h-full w-full object-contain"
+            className="block h-full w-full object-contain drop-shadow-[0_18px_42px_rgba(0,0,0,0.20)]"
             loading="lazy"
             src={card.src}
           />
         </div>
-        <div className="template-door-top template-door-height-open absolute inset-x-0 top-0 h-1/2 bg-[linear-gradient(180deg,rgba(223,244,229,0.96),rgba(188,235,200,0.84))] shadow-[0_10px_26px_rgba(15,93,56,0.18)] backdrop-blur-sm" />
-        <div className="template-door-bottom template-door-height-open absolute inset-x-0 bottom-0 h-1/2 bg-[linear-gradient(0deg,rgba(223,244,229,0.96),rgba(188,235,200,0.84))] shadow-[0_-10px_26px_rgba(15,93,56,0.16)] backdrop-blur-sm" />
+        <div className="template-preview-scan-line pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-[linear-gradient(90deg,transparent,rgba(223,244,229,0.74),transparent)]" />
       </div>
     </div>
   );
@@ -1180,7 +1175,7 @@ function TemplatePreviewStack({
 
 function MiniCvMock({ accent, title }: { accent: string; title: string }) {
   return (
-    <div className="template-mock-cv-back aspect-[3/4] bg-white p-4 text-[#102f1e]">
+    <div className="template-preview-layer template-mock-cv-back size-full bg-white p-4 text-[#102f1e]">
       <div className="flex items-start justify-between gap-3 border-b border-[#dcece0] pb-3">
         <div>
           <div
