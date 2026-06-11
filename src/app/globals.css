@@ -60,6 +60,12 @@ select {
   clip-path: circle(0% at 50% 50%);
 }
 
+.landing-motion-preload .welcome-horizontal-mask {
+  clip-path: circle(8% at 50% 50%);
+  transform: translate(-50%, -50%) rotate(-18deg) scaleX(0) scaleY(0.22);
+  transform-origin: 50% 50%;
+}
+
 .landing-motion-preload .phase-split {
   visibility: hidden;
 }

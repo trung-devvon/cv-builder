@@ -54,6 +54,10 @@ const forbidden = [
     pattern: />\s*Phase 0\b|>\s*phase 0\b/
   },
   {
+    label: "stale phase renumbering comment",
+    pattern: /previously phase/
+  },
+  {
     label: "welcome circular shrink wipe",
     pattern: /(?:gsap\.set|\.to)\("\.phase-welcome",\s*\{[^}]*clipPath:\s*"circle/
   },
@@ -76,6 +80,10 @@ const forbidden = [
   {
     label: "inline phase layer initial styles",
     pattern: /initialPhaseLayerStyles/
+  },
+  {
+    label: "welcome cap one-sided corner exit",
+    pattern: /\.to\("\.welcome-horizontal-mask",\s*\{[\s\S]*?clipPath:\s*"inset\(0% 0% 0% 100%\)"/
   }
 ];
 
@@ -94,17 +102,34 @@ const requiredMarkers = [
   "welcome-right-panel",
   "welcome-rotating-mask",
   "welcome-horizontal-mask",
+  "welcome-cap-swirl",
+  "welcome-cap-core",
+  "welcome-cap-glow",
+  "welcome-cap-ring",
+  "welcome-cap-ridge-set",
+  "welcome-cap-ridge",
   "welcome-dock-stage",
   "welcome-figure-left",
   "welcome-figure-right",
   "welcome-image-frame-left",
   "welcome-image-frame-right",
+  "welcome-image-stage-left",
+  "welcome-image-stage-right",
+  "welcome-image-sheet-left",
+  "welcome-image-sheet-right",
   "welcome-label-left",
   "welcome-label-right",
   "welcome-label-docked",
   "welcome-ornament-layer",
   "welcome-ornament-line",
   "welcome-ornament-note",
+  "phase-two-signal-orbit",
+  "phase-two-orbit-card",
+  "phase-two-orbit-rail",
+  "phase-two-orbit-node",
+  "phase-two-orbit-index",
+  "phase-two-orbit-title",
+  "phase-two-orbit-copy",
   "welcome-corner-top-left",
   "welcome-corner-top-right",
   "welcome-corner-bottom-left",
@@ -182,6 +207,11 @@ const preloadGuardChecks = [
     pattern: /\.landing-motion-preload \.phase-white[\s\S]*clip-path:\s*circle\(0%/
   },
   {
+    label: "welcome cap preload hidden guard",
+    source: styles,
+    pattern: /\.landing-motion-preload \.welcome-horizontal-mask[\s\S]*scaleX\(0\)/
+  },
+  {
     label: "phase 2 preload clip guard",
     source: styles,
     pattern: /\.landing-motion-preload \.phase-green[\s\S]*clip-path:\s*circle\(0%/
@@ -249,9 +279,92 @@ if (welcomeDuration && welcomeDockStart && welcomeDockDuration) {
 const welcomeHorizontalSet = source.match(
   /gsap\.set\("\.welcome-horizontal-mask",\s*\{[\s\S]*?\}\);/
 );
+const welcomeCapRidgeSet = source.match(
+  /gsap\.set\("\.welcome-cap-ridge",\s*\{[\s\S]*?\}\);/
+);
+const welcomeHorizontalClassName = source.match(
+  /className="[^"]*\bwelcome-horizontal-mask\b[^"]*"/
+);
+const welcomeHorizontalTweens = [
+  ...source.matchAll(/\.to\("\.welcome-horizontal-mask",\s*\{[\s\S]*?\},\s*[^)]*\)/g)
+];
+const welcomeHorizontalEndMotion = source.match(
+  /\.to\("\.welcome-horizontal-mask",\s*\{\s*clipPath:\s*"circle\(1[2-7]% at 50% 50%\)",[\s\S]*?\},\s*WELCOME_WIPE_DURATION\s*\*\s*0\.62\)/
+);
+const phaseWelcomeBlock = source.match(
+  /function PhaseWelcome[\s\S]*?function WelcomeOrnaments/
+);
+const welcomeTransitionBlock = source.match(
+  /function PhaseWelcome[\s\S]*?function WelcomeInspiration/
+);
 
 if (!welcomeHorizontalSet || !welcomeHorizontalSet[0].includes("scaleX: 0")) {
   failures.push("Welcome rotating axis should start at 0% scaleX before expanding on scroll.");
+}
+
+if (!welcomeHorizontalSet || !welcomeHorizontalSet[0].includes("xPercent: -50") || !welcomeHorizontalSet[0].includes("yPercent: -50")) {
+  failures.push("Welcome cap swirl should preserve centered x/y percent transforms so it does not render off-screen.");
+}
+
+if (!welcomeHorizontalClassName || /-translate-[xy]-1\/2/.test(welcomeHorizontalClassName[0])) {
+  failures.push("Welcome cap swirl should not combine Tailwind translate utilities with GSAP xPercent centering.");
+}
+
+if (welcomeHorizontalTweens.some((match) => /\b[xy]Percent\s*:/.test(match[0]))) {
+  failures.push("Welcome cap swirl tweens should keep xPercent/yPercent centered and use x/y for any drift.");
+}
+
+if (!welcomeCapRidgeSet || !welcomeCapRidgeSet[0].includes('transformOrigin: "0% 50%"')) {
+  failures.push("Welcome cap ridges should scale from the center axis to strengthen the twist-opening feel.");
+}
+
+if (!welcomeHorizontalEndMotion) {
+  failures.push("Welcome cap swirl should have an explicit compact endpoint before phase 2 orbit settles.");
+} else {
+  const endSource = welcomeHorizontalEndMotion[0];
+  const scaleX = endSource.match(/scaleX:\s*([\d.]+)/);
+  const scaleY = endSource.match(/scaleY:\s*([\d.]+)/);
+
+  if (!endSource.includes("rotate: 0")) {
+    failures.push("Welcome cap endpoint should be upright inside the phase 2 rail.");
+  }
+
+  if (!endSource.includes("x: 0") || !endSource.includes("y: 0")) {
+    failures.push("Welcome cap endpoint should be centered in the phase 2 rail, not drifting diagonally.");
+  }
+
+  if (!scaleX || !scaleY || Number(scaleX[1]) > 0.44 || Number(scaleY[1]) > 0.44 || scaleX[1] !== scaleY[1]) {
+    failures.push("Welcome cap endpoint should use a compact uniform scale so it fits within the phase 2 rail.");
+  }
+
+}
+
+if (!phaseWelcomeBlock) {
+  failures.push("Missing PhaseWelcome implementation block.");
+} else {
+  const welcomeSource = phaseWelcomeBlock[0];
+  const ridgeCount = source.match(/const capRidges = Array\.from\(\{ length: (\d+) \}/);
+  const capCoreClass = welcomeSource.match(/className="[^"]*\bwelcome-cap-core\b[^"]*"/);
+
+  if (/welcome-aurora/.test(welcomeSource)) {
+    failures.push("Welcome transition should use cap-swirl naming, not the old aurora scene.");
+  }
+
+  if (!ridgeCount || Number(ridgeCount[1]) < 10) {
+    failures.push("Welcome cap swirl should render enough radial ridges to read as a twist opening.");
+  }
+
+  if (!capCoreClass || !capCoreClass[0].includes("conic-gradient")) {
+    failures.push("Welcome cap core should use a conic gradient for the twist direction.");
+  }
+
+  if (capCoreClass && /#78a6ff|#f5c15b|#ff8f70|#e0b15b/.test(capCoreClass[0])) {
+    failures.push("Welcome cap core should stay in restrained green and ivory tones, not the old multi-color palette.");
+  }
+}
+
+if (welcomeTransitionBlock && /#78a6ff/.test(welcomeTransitionBlock[0])) {
+  failures.push("Welcome phase transition should avoid blue accent points near the cap swirl.");
 }
 
 const welcomeLeftImageMotion = source.match(/\.to\("\.welcome-image-left",\s*\{[\s\S]*?\},\s*0\)/);
@@ -268,6 +381,8 @@ if (!welcomeRightImageMotion || !welcomeRightImageMotion[0].includes("yPercent: 
 const welcomeLeftDockMotion = source.match(/\.to\("\.welcome-figure-left",\s*\{[\s\S]*?\},\s*WELCOME_DOCK_START\)/);
 const welcomeRightDockMotion = source.match(/\.to\("\.welcome-figure-right",\s*\{[\s\S]*?\},\s*WELCOME_DOCK_START\)/);
 const welcomeFrameDockMotion = source.match(/\.to\("\.welcome-image-frame-left, \.welcome-image-frame-right",\s*\{[\s\S]*?\},\s*WELCOME_DOCK_START\)/);
+const welcomeSheetSetMotion = source.match(/gsap\.set\("\.welcome-image-sheet-left, \.welcome-image-sheet-right",\s*\{[\s\S]*?\}\);/);
+const welcomeSheetDockMotion = source.match(/\.to\("\.welcome-image-sheet-left, \.welcome-image-sheet-right",\s*\{[\s\S]*?\},\s*WELCOME_DOCK_START(?:\s*\+\s*[\d.]+)?\)/);
 const welcomeLeftLabelDockMotion = source.match(/\.to\("\.welcome-label-left",\s*\{[\s\S]*?\},\s*WELCOME_DOCK_START\)/);
 const welcomeRightLabelDockMotion = source.match(/\.to\("\.welcome-label-right",\s*\{[\s\S]*?\},\s*WELCOME_DOCK_START\)/);
 const welcomeOrnamentLineMotion = source.match(/\.to\("\.welcome-ornament-line",\s*\{[\s\S]*?\},\s*WELCOME_DOCK_START\)/);
@@ -287,8 +402,24 @@ if (welcomeRightDockMotion && /y:\s*"8vh"|yPercent:\s*16/.test(welcomeRightDockM
   failures.push("Right welcome figure should not dock so low that it can cover the bottom scroll label.");
 }
 
-if (!welcomeFrameDockMotion || !welcomeFrameDockMotion[0].includes("scaleX")) {
-  failures.push("Welcome CV image frames should widen during the docking beat.");
+if (!welcomeFrameDockMotion || !welcomeFrameDockMotion[0].includes("scale:")) {
+  failures.push("Welcome CV image frames should scale uniformly during the docking beat.");
+}
+
+if (welcomeFrameDockMotion && /scaleX|scaleY/.test(welcomeFrameDockMotion[0])) {
+  failures.push("Welcome CV image frames should not use non-uniform scale during docking.");
+}
+
+if (!welcomeSheetSetMotion || !welcomeSheetSetMotion[0].includes("clipPath")) {
+  failures.push("Welcome CV sheet layers should start hidden before the docking beat.");
+}
+
+if (!welcomeSheetDockMotion || !welcomeSheetDockMotion[0].includes("clipPath")) {
+  failures.push("Welcome CV sheet layers should reveal during the docking beat.");
+}
+
+if (welcomeSheetDockMotion && !/WELCOME_DOCK_START\s*\+\s*WELCOME_DOCK_DURATION\s*\*/.test(welcomeSheetDockMotion[0])) {
+  failures.push("Welcome CV sheet layers should reveal near the end of the docking beat.");
 }
 
 if (!welcomeLeftLabelDockMotion || !welcomeLeftLabelDockMotion[0].includes("rotate: 90")) {
@@ -468,6 +599,10 @@ const previewStackBlock = source.match(
   /function TemplatePreviewStack[\s\S]*?function PhaseSplit/
 );
 
+const welcomeInspirationBlock = source.match(
+  /function WelcomeInspiration[\s\S]*?function ColorFillText/
+);
+
 if (previewStackBlock) {
   const previewSource = previewStackBlock[0];
 
@@ -489,6 +624,30 @@ if (previewStackBlock) {
 
   if (/background CV preview/.test(previewSource)) {
     failures.push("Template preview back layer should be a mock CV, not the same image source.");
+  }
+}
+
+if (welcomeInspirationBlock) {
+  const welcomeSource = welcomeInspirationBlock[0];
+
+  if (!welcomeSource.includes("welcome-image-stage-left") || !welcomeSource.includes("welcome-image-stage-right")) {
+    failures.push("Welcome inspiration images should render inside dedicated aspect-ratio stages.");
+  }
+
+  if (!/welcome-image-stage-left[^"]*aspect-\[/.test(welcomeSource) || !/welcome-image-stage-right[^"]*aspect-\[/.test(welcomeSource)) {
+    failures.push("Welcome inspiration stages should define explicit aspect ratios.");
+  }
+
+  if (/className="aspect-\[3\/4\] h-auto w-full object-contain"/.test(welcomeSource)) {
+    failures.push("Welcome inspiration images should not apply a fixed aspect ratio directly on the img tag.");
+  }
+
+  if (!/welcome-image-sheet-left[^"]*-translate-x-\[10%\][^"]*translate-y-\[10%\]/.test(welcomeSource)) {
+    failures.push("Left welcome CV sheet should sit 10% lower and 10% left of the image.");
+  }
+
+  if (!/welcome-image-sheet-right[^"]*-translate-x-\[10%\][^"]*translate-y-\[10%\]/.test(welcomeSource)) {
+    failures.push("Right welcome CV sheet should sit 10% lower and 10% left of the image.");
   }
 }
 

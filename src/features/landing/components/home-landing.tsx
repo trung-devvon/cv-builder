@@ -24,6 +24,7 @@ const WELCOME_DOCK_START = 0.78;
 const WELCOME_DOCK_DURATION = 0.58;
 const WELCOME_DURATION = 1.36;
 const welcomeLetters = ["W", "E", "L", "C", "O", "M", "E"];
+const capRidges = Array.from({ length: 14 }, (_, index) => index);
 
 const templateImageCards = [
   {
@@ -122,14 +123,34 @@ export function HomeLanding() {
         gsap.set(".welcome-left-panel, .welcome-right-panel", {
           xPercent: 0
         });
-        gsap.set(".welcome-rotating-mask", {
-          rotate: 0
-        });
         gsap.set(".welcome-horizontal-mask", {
-          clipPath: "inset(0% 0% 0% 0%)",
-          rotate: 0,
+          clipPath: "circle(8% at 50% 50%)",
+          rotate: -18,
           scaleX: 0,
-          scaleY: 1.18
+          scaleY: 0.22,
+          transformOrigin: "50% 50%",
+          x: 0,
+          xPercent: -50,
+          y: 0,
+          yPercent: -50
+        });
+        gsap.set(".welcome-cap-core", {
+          rotate: -34,
+          scale: 0.84,
+          transformOrigin: "50% 50%"
+        });
+        gsap.set(".welcome-cap-glow", {
+          scale: 0.62,
+          transformOrigin: "50% 50%"
+        });
+        gsap.set(".welcome-cap-ring", {
+          rotate: 0,
+          scale: 0.74,
+          transformOrigin: "50% 50%"
+        });
+        gsap.set(".welcome-cap-ridge", {
+          scaleX: 0.18,
+          transformOrigin: "0% 50%"
         });
         gsap.set(".welcome-image-left", {
           yPercent: 8,
@@ -150,9 +171,12 @@ export function HomeLanding() {
           transformOrigin: "50% 50%"
         });
         gsap.set(".welcome-image-frame-left, .welcome-image-frame-right", {
-          scaleX: 0.86,
-          scaleY: 0.98,
+          scale: 0.92,
           transformOrigin: "50% 50%"
+        });
+        gsap.set(".welcome-image-sheet-left, .welcome-image-sheet-right", {
+          clipPath: "inset(0% 0% 100% 0%)",
+          y: 24
         });
         gsap.set(".welcome-ornament-line", {
           clipPath: "inset(0% 100% 0% 0%)"
@@ -160,6 +184,17 @@ export function HomeLanding() {
         gsap.set(".welcome-ornament-note", {
           y: 18,
           clipPath: "inset(0% 0% 100% 0%)"
+        });
+        gsap.set(".phase-two-orbit-card", {
+          clipPath: "inset(0% 0% 100% 0%)",
+          rotationX: -14,
+          scale: 0.9,
+          transformOrigin: "50% 50%",
+          y: 26
+        });
+        gsap.set(".phase-two-orbit-node", {
+          scale: 0,
+          transformOrigin: "50% 50%"
         });
         gsap.set(".welcome-scroll-fill", {
           clipPath: "inset(0% 100% 0% 0%)"
@@ -271,19 +306,64 @@ export function HomeLanding() {
             duration: WELCOME_WIPE_DURATION * 0.78,
             stagger: 0.08
           }, WELCOME_WIPE_DURATION * 0.12)
-          .to(".welcome-rotating-mask", {
-            rotate: 180,
-            duration: WELCOME_WIPE_DURATION
-          }, 0)
           .to(".welcome-horizontal-mask", {
-            rotate: 180,
-            scaleX: 1.28,
-            scaleY: 0.16,
+            clipPath: "circle(45% at 50% 50%)",
+            rotate: 34,
+            scaleX: 1,
+            scaleY: 1,
             duration: WELCOME_WIPE_DURATION * 0.88
           }, WELCOME_WIPE_DURATION * 0.04)
+          .to(".welcome-cap-core", {
+            rotate: 128,
+            scale: 1.08,
+            duration: WELCOME_WIPE_DURATION * 0.86
+          }, WELCOME_WIPE_DURATION * 0.04)
+          .to(".welcome-cap-glow", {
+            scale: 1,
+            duration: WELCOME_WIPE_DURATION * 0.66,
+            stagger: 0.04
+          }, WELCOME_WIPE_DURATION * 0.12)
+          .to(".welcome-cap-ring", {
+            rotate: -78,
+            scale: 1,
+            duration: WELCOME_WIPE_DURATION * 0.72,
+            stagger: 0.04
+          }, WELCOME_WIPE_DURATION * 0.12)
+          .to(".welcome-cap-ridge", {
+            scaleX: 1,
+            duration: WELCOME_WIPE_DURATION * 0.64,
+            stagger: {
+              amount: 0.18,
+              from: "center"
+            }
+          }, WELCOME_WIPE_DURATION * 0.16)
           .to(".welcome-horizontal-mask", {
-            clipPath: "inset(0% 0% 0% 100%)",
-            duration: WELCOME_WIPE_DURATION * 0.3
+            clipPath: "circle(15% at 50% 50%)",
+            rotate: 0,
+            scaleX: 0.42,
+            scaleY: 0.42,
+            x: 0,
+            y: 0,
+            duration: WELCOME_WIPE_DURATION * 0.34
+          }, WELCOME_WIPE_DURATION * 0.62)
+          .to(".welcome-cap-core", {
+            rotate: 218,
+            scale: 0.86,
+            duration: WELCOME_WIPE_DURATION * 0.34
+          }, WELCOME_WIPE_DURATION * 0.62)
+          .to(".welcome-cap-ring", {
+            rotate: -136,
+            scale: 0.76,
+            duration: WELCOME_WIPE_DURATION * 0.32,
+            stagger: 0.02
+          }, WELCOME_WIPE_DURATION * 0.62)
+          .to(".welcome-cap-ridge", {
+            scaleX: 0.38,
+            duration: WELCOME_WIPE_DURATION * 0.28,
+            stagger: {
+              amount: 0.1,
+              from: "edges"
+            }
           }, WELCOME_WIPE_DURATION * 0.64)
           .to(".phase-welcome-shell", {
             clipPath: "inset(0% 50% 0% 50%)",
@@ -291,37 +371,42 @@ export function HomeLanding() {
             duration: WELCOME_WIPE_DURATION * 0.44
           }, WELCOME_WIPE_DURATION * 0.42)
           .to(".welcome-figure-left", {
-            x: "24vw",
-            xPercent: 22,
-            y: "-5vh",
-            yPercent: -10,
+            x: "22vw",
+            xPercent: 18,
+            y: "-1vh",
+            yPercent: -2,
             duration: WELCOME_DOCK_DURATION
           }, WELCOME_DOCK_START)
           .to(".welcome-figure-right", {
-            x: "-24vw",
-            xPercent: -22,
-            y: "1vh",
-            yPercent: 4,
+            x: "-22vw",
+            xPercent: -18,
+            y: "2vh",
+            yPercent: 6,
             duration: WELCOME_DOCK_DURATION
           }, WELCOME_DOCK_START)
           .to(".welcome-image-frame-left, .welcome-image-frame-right", {
-            scaleX: 1.16,
-            scaleY: 1.06,
+            scale: 1.06,
             rotate: 0,
             duration: WELCOME_DOCK_DURATION
           }, WELCOME_DOCK_START)
+          .to(".welcome-image-sheet-left, .welcome-image-sheet-right", {
+            clipPath: "inset(0% 0% 0% 0%)",
+            y: 0,
+            duration: WELCOME_DOCK_DURATION * 0.26,
+            stagger: 0.04
+          }, WELCOME_DOCK_START + WELCOME_DOCK_DURATION * 0.7)
           .to(".welcome-label-left", {
             rotate: 90,
-            scale: 0.58,
-            xPercent: -112,
-            yPercent: -152,
+            scale: 0.54,
+            xPercent: -64,
+            yPercent: -108,
             duration: WELCOME_DOCK_DURATION
           }, WELCOME_DOCK_START)
           .to(".welcome-label-right", {
             rotate: -90,
-            scale: 0.58,
-            xPercent: 112,
-            yPercent: 176,
+            scale: 0.54,
+            xPercent: 64,
+            yPercent: 132,
             duration: WELCOME_DOCK_DURATION
           }, WELCOME_DOCK_START)
           .to(".welcome-ornament-line", {
@@ -329,6 +414,19 @@ export function HomeLanding() {
             duration: WELCOME_DOCK_DURATION * 0.78,
             stagger: 0.04
           }, WELCOME_DOCK_START)
+          .to(".phase-two-orbit-node", {
+            scale: 1,
+            duration: WELCOME_DOCK_DURATION * 0.42,
+            stagger: 0.05
+          }, WELCOME_DOCK_START + 0.02)
+          .to(".phase-two-orbit-card", {
+            clipPath: "inset(0% 0% 0% 0%)",
+            rotationX: 0,
+            scale: 1,
+            y: 0,
+            duration: WELCOME_DOCK_DURATION * 0.72,
+            stagger: 0.06
+          }, WELCOME_DOCK_START + 0.04)
           .to(".welcome-ornament-note", {
             y: 0,
             clipPath: "inset(0% 0% 0% 0%)",
@@ -599,14 +697,20 @@ function ScrollChoreography({
     <section className="choreo-section relative min-h-[1060vh] max-w-[100vw] overflow-x-hidden bg-[#f4fbf5]">
       <div className="choreo-stage relative h-dvh w-full max-w-[100vw] overflow-hidden">
         <StageHeader />
+        {/* Intro hero: pre-phase landing scene */}
         <PhaseHero />
+        {/* Phase 01 includes the welcome lockup; Phase 02 is the signal orbit inside WelcomeOrnaments. */}
         <PhaseWelcome />
+        {/* Phase 03: readable base */}
         <PhaseWhite />
+        {/* Phase 04: compose */}
         <PhaseGreen
           activeTemplateIndex={activeTemplateIndex}
           onSelectTemplate={onSelectTemplate}
         />
+        {/* Phase 05: apply */}
         <PhaseSplit />
+        {/* Phase 06: template depth */}
         <PhaseDepth />
       </div>
     </section>
@@ -639,13 +743,28 @@ function StageHeader() {
 }
 
 function PhaseWelcome() {
+  // Phase 01: welcome lockup. Phase 02 is composed by WelcomeOrnaments.
   return (
     <section className="phase-welcome pointer-events-none absolute inset-0 z-[18] overflow-hidden text-white">
       <div className="absolute inset-0 bg-[#102f1e]" />
       <div className="welcome-left-panel absolute inset-y-0 left-0 w-1/2 bg-[radial-gradient(circle_at_100%_50%,rgba(255,253,248,0.18),rgba(16,47,30,0.58)_42%,#102f1e_100%)]" />
       <div className="welcome-right-panel absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_0%_50%,rgba(255,253,248,0.18),rgba(16,47,30,0.58)_42%,#102f1e_100%)]" />
-      <div className="welcome-horizontal-mask absolute left-1/2 top-1/2 z-[1] h-[150vmax] w-[150vmax] -translate-x-1/2 -translate-y-1/2 overflow-hidden">
-        <div className="welcome-rotating-mask h-full w-full bg-[conic-gradient(from_90deg_at_50%_50%,#bcebc8_0deg,#49b77a_58deg,#fffdf8_118deg,#f5c15b_180deg,#102f1e_238deg,#bcebc8_360deg)]" />
+      <div className="welcome-horizontal-mask welcome-cap-swirl absolute left-1/2 top-1/2 z-[1] h-[150vmax] w-[150vmax] overflow-hidden rounded-full will-change-transform">
+        <div className="welcome-rotating-mask welcome-cap-core absolute inset-0 bg-[conic-gradient(from_216deg_at_50%_50%,#dff4e5_0deg,#8de0aa_34deg,#1a6a42_74deg,#102f1e_118deg,#eaf7ec_154deg,#39a86b_196deg,#102f1e_254deg,#dff4e5_360deg)]" />
+        <div className="welcome-cap-glow absolute left-1/2 top-1/2 h-[42%] w-[42%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,253,248,0.72),rgba(188,235,200,0.24)_34%,rgba(16,47,30,0)_68%)] blur-2xl" />
+        <div className="welcome-cap-ring absolute inset-[9%] rounded-full border border-[#dff4e5]/24 shadow-[inset_0_0_38px_rgba(223,244,229,0.16),0_0_44px_rgba(57,168,107,0.16)]" />
+        <div className="welcome-cap-ring absolute inset-[22%] rounded-full border border-[#eaf7ec]/18 shadow-[inset_0_0_28px_rgba(234,247,236,0.12)]" />
+        <div className="welcome-cap-ridge-set absolute inset-0">
+          {capRidges.map((ridge) => (
+            <span
+              key={ridge}
+              className="welcome-cap-ridge absolute left-1/2 top-1/2 h-[2px] w-[34%] origin-left rounded-full bg-[linear-gradient(90deg,rgba(234,247,236,0.02),rgba(234,247,236,0.68),rgba(57,168,107,0.18))] shadow-[0_0_18px_rgba(223,244,229,0.18)]"
+              style={{
+                transform: `rotate(${ridge * (360 / capRidges.length)}deg) translateX(7%)`
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       <WelcomeInspiration />
@@ -690,50 +809,74 @@ function PhaseWelcome() {
 }
 
 function WelcomeOrnaments() {
+  // Phase 02: signal orbit around the welcome lockup.
   const ornaments = [
     {
-      className: "welcome-corner-top-left left-[18%] top-[19%]",
+      className: "welcome-corner-top-left left-[11%] top-[18%]",
       align: "items-start text-left",
+      icon: ShieldCheck,
       eyebrow: "01 / ATS grid",
-      label: "Readable lines"
+      label: "Readable lines",
+      text: "Core details stay in recruiter-friendly scan zones."
     },
     {
-      className: "welcome-corner-top-right right-[17%] top-[18%]",
+      className: "welcome-corner-top-right right-[10%] top-[17%]",
       align: "items-end text-right",
-      eyebrow: "02 / portfolio",
-      label: "Visual proof"
+      icon: Sparkles,
+      eyebrow: "02 / proof layer",
+      label: "Visual proof",
+      text: "Personality sits around the CV without burying the facts."
     },
     {
-      className: "welcome-corner-bottom-left bottom-[16%] left-[16%]",
+      className: "welcome-corner-bottom-left bottom-[14%] left-[12%]",
       align: "items-start text-left",
+      icon: Palette,
       eyebrow: "03 / signal",
-      label: "Role fit"
+      label: "Role fit",
+      text: "Template tone can shift while the content model stays stable."
     },
     {
-      className: "welcome-corner-bottom-right bottom-[17%] right-[17%]",
+      className: "welcome-corner-bottom-right bottom-[15%] right-[11%]",
       align: "items-end text-right",
+      icon: Download,
       eyebrow: "04 / export",
-      label: "Clean output"
+      label: "Clean output",
+      text: "The same structured CV carries into PDF and image output."
     }
   ];
 
   return (
-    <div className="welcome-ornament-layer pointer-events-none absolute inset-0 z-[7] hidden md:block">
+    <div className="welcome-ornament-layer phase-two-signal-orbit pointer-events-none absolute inset-0 z-[7] hidden md:block">
+      <div className="phase-two-orbit-rail welcome-ornament-line absolute left-1/2 top-1/2 h-[min(64vh,34rem)] w-[min(74vw,58rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#f5c15b]/18" />
+      <div className="phase-two-orbit-rail welcome-ornament-line absolute left-1/2 top-1/2 h-[min(48vh,25rem)] w-[min(58vw,44rem)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#bcebc8]/14" />
+      <span className="phase-two-orbit-node absolute left-1/2 top-[18%] size-2 -translate-x-1/2 rounded-full bg-[#f5c15b] shadow-[0_0_24px_rgba(245,193,91,0.52)]" />
+      <span className="phase-two-orbit-node absolute bottom-[16%] left-1/2 size-2 -translate-x-1/2 rounded-full bg-[#bcebc8] shadow-[0_0_24px_rgba(188,235,200,0.48)]" />
+      <span className="phase-two-orbit-node absolute left-[18%] top-1/2 size-2 -translate-y-1/2 rounded-full bg-[#eaf7ec] shadow-[0_0_24px_rgba(234,247,236,0.42)]" />
+      <span className="phase-two-orbit-node absolute right-[18%] top-1/2 size-2 -translate-y-1/2 rounded-full bg-[#f5c15b] shadow-[0_0_24px_rgba(245,193,91,0.42)]" />
+
       {ornaments.map((item) => (
         <div
           key={item.eyebrow}
           className={cn(
-            "absolute flex w-[clamp(8rem,13vw,14rem)] flex-col gap-2 text-[#dff4e5]/58",
+            "phase-two-orbit-card absolute flex w-[clamp(11rem,16vw,16.5rem)] flex-col gap-2 rounded-[8px] border border-white/12 bg-[#102f1e]/48 p-3 text-[#dff4e5]/72 shadow-[0_18px_48px_rgba(0,0,0,0.16)] backdrop-blur-[1px] will-change-transform",
             item.align,
             item.className
           )}
         >
-          <span className="welcome-ornament-line block h-px w-full bg-[linear-gradient(90deg,transparent,rgba(245,193,91,0.72),rgba(188,235,200,0.45),transparent)]" />
-          <span className="welcome-ornament-note font-mono text-[10px] font-black uppercase tracking-[0.18em] text-[#f5c15b]/80">
-            {item.eyebrow}
+          <span className="welcome-ornament-line phase-two-orbit-rail block h-px w-full bg-[linear-gradient(90deg,transparent,rgba(245,193,91,0.78),rgba(188,235,200,0.48),transparent)]" />
+          <span className="welcome-ornament-note flex items-center gap-2">
+            <span className="phase-two-orbit-node grid size-8 shrink-0 place-items-center rounded-full border border-[#f5c15b]/26 bg-[#fffdf8]/10 text-[#f5c15b]">
+              <item.icon aria-hidden className="size-4" />
+            </span>
+            <span className="phase-two-orbit-index font-mono text-[10px] font-black uppercase tracking-[0.18em] text-[#f5c15b]/86">
+              {item.eyebrow}
+            </span>
           </span>
-          <span className="welcome-ornament-note font-[var(--font-display)] text-[clamp(1.05rem,1.8vw,1.6rem)] font-black uppercase leading-none text-[#dff4e5]/64">
+          <span className="welcome-ornament-note phase-two-orbit-title font-[var(--font-display)] text-[clamp(1.15rem,1.9vw,1.75rem)] font-black uppercase leading-none text-[#fffdf8]">
             {item.label}
+          </span>
+          <span className="welcome-ornament-note phase-two-orbit-copy text-[11px] font-semibold leading-5 text-[#dff4e5]/62">
+            {item.text}
           </span>
         </div>
       ))}
@@ -747,31 +890,49 @@ function WelcomeInspiration() {
 
   return (
     <div className="welcome-dock-stage pointer-events-none absolute inset-0 z-[8] hidden overflow-hidden md:block">
-      <figure className="welcome-figure-left welcome-inspiration-left absolute left-[clamp(0.75rem,3.8vw,4rem)] top-[clamp(6.25rem,16vh,9.5rem)] grid w-[clamp(7.25rem,12.5vw,11.25rem)] gap-[clamp(1.25rem,2.6vw,2rem)]">
-        <div className="welcome-image-frame-left welcome-image-left relative z-10 overflow-hidden rounded-[20px] border border-white/22 bg-[#fffdf8] p-2 shadow-[0_26px_70px_rgba(0,0,0,0.28)]">
-          <img
-            alt={`${leftCard.name} CV inspiration`}
-            className="aspect-[3/4] h-auto w-full object-contain"
-            loading="lazy"
-            src={leftCard.src}
-          />
+      <figure className="welcome-figure-left welcome-inspiration-left absolute left-[clamp(1.5rem,4.6vw,5rem)] top-[clamp(8rem,18vh,11rem)] grid w-[clamp(8.5rem,14vw,12.75rem)] gap-[clamp(1.1rem,2.2vw,1.7rem)]">
+        <div className="welcome-image-left relative isolate">
+          <div className="welcome-image-sheet-left absolute inset-0 z-0 -translate-x-[10%] translate-y-[10%]">
+            <div className="w-full overflow-hidden rounded-[20px] border border-white/14 bg-white/12 shadow-[0_18px_46px_rgba(0,0,0,0.18)] backdrop-blur-[1px]">
+              <WelcomeSheetMock accent={leftCard.accent} />
+            </div>
+          </div>
+          <div className="welcome-image-frame-left relative z-10 overflow-hidden rounded-[20px] border border-white/22 bg-[#fffdf8] p-2 shadow-[0_26px_70px_rgba(0,0,0,0.28)]">
+            <div className="welcome-image-stage-left aspect-[0.76] overflow-hidden rounded-[15px] bg-[#f6f2eb]">
+              <img
+                alt={`${leftCard.name} CV inspiration`}
+                className="h-full w-full object-contain object-top"
+                loading="lazy"
+                src={leftCard.src}
+              />
+            </div>
+          </div>
         </div>
         <figcaption className="welcome-label-docked welcome-label-left welcome-inspiration-copy relative z-20 max-w-[10ch] font-[var(--font-display)] text-[clamp(1.45rem,3vw,3.3rem)] font-black uppercase leading-[0.84] tracking-normal">
           <ColorFillText>Signal first</ColorFillText>
         </figcaption>
       </figure>
 
-      <figure className="welcome-figure-right welcome-inspiration-right absolute right-[clamp(0.75rem,3.8vw,4rem)] top-[clamp(4.75rem,11vh,7rem)] grid w-[clamp(7.25rem,12.5vw,11.25rem)] gap-[clamp(1.25rem,2.6vw,2rem)] text-right">
+      <figure className="welcome-figure-right welcome-inspiration-right absolute right-[clamp(1.5rem,4.6vw,5rem)] top-[clamp(6.75rem,15vh,9.75rem)] grid w-[clamp(8.5rem,14vw,12.75rem)] gap-[clamp(1.1rem,2.2vw,1.7rem)] text-right">
         <figcaption className="welcome-label-docked welcome-label-right welcome-inspiration-copy relative z-20 justify-self-end max-w-[10ch] font-[var(--font-display)] text-[clamp(1.45rem,3vw,3.3rem)] font-black uppercase leading-[0.84] tracking-normal">
           <ColorFillText>Styled clean</ColorFillText>
         </figcaption>
-        <div className="welcome-image-frame-right welcome-image-right relative z-10 overflow-hidden rounded-[20px] border border-white/22 bg-[#fffdf8] p-2 shadow-[0_26px_70px_rgba(0,0,0,0.28)]">
-          <img
-            alt={`${rightCard.name} CV inspiration`}
-            className="aspect-[3/4] h-auto w-full object-contain"
-            loading="lazy"
-            src={rightCard.src}
-          />
+        <div className="welcome-image-right relative isolate">
+          <div className="welcome-image-sheet-right absolute inset-0 z-0 -translate-x-[10%] translate-y-[10%]">
+            <div className="w-full overflow-hidden rounded-[20px] border border-white/14 bg-white/12 shadow-[0_18px_46px_rgba(0,0,0,0.18)] backdrop-blur-[1px]">
+              <WelcomeSheetMock accent={rightCard.accent} />
+            </div>
+          </div>
+          <div className="welcome-image-frame-right relative z-10 overflow-hidden rounded-[20px] border border-white/22 bg-[#fffdf8] p-2 shadow-[0_26px_70px_rgba(0,0,0,0.28)]">
+            <div className="welcome-image-stage-right aspect-[0.76] overflow-hidden rounded-[15px] bg-[#f6f2eb]">
+              <img
+                alt={`${rightCard.name} CV inspiration`}
+                className="h-full w-full object-contain object-top"
+                loading="lazy"
+                src={rightCard.src}
+              />
+            </div>
+          </div>
         </div>
       </figure>
     </div>
@@ -791,6 +952,31 @@ function ColorFillText({ children }: { children: React.ReactNode }) {
         </span>
       </span>
     </span>
+  );
+}
+
+function WelcomeSheetMock({ accent }: { accent: string }) {
+  return (
+    <div className="flex h-full w-full flex-col justify-between bg-[#fbf8f1] p-3 text-[#183325]">
+      <div>
+        <div
+          className="h-1.5 w-12 rounded-full"
+          style={{ backgroundColor: accent }}
+        />
+        <div className="mt-3 h-2.5 w-20 rounded-full bg-[#183325]" />
+        <div className="mt-2 h-1.5 w-14 rounded-full bg-[#98b7a2]" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-1.5 rounded-full bg-[#d7e6da]" />
+        <div className="h-1.5 w-11/12 rounded-full bg-[#e4efe7]" />
+        <div className="h-1.5 w-10/12 rounded-full bg-[#d7e6da]" />
+        <div className="h-1.5 w-9/12 rounded-full bg-[#e4efe7]" />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="h-8 rounded-[10px] bg-[#edf4ee]" />
+        <div className="h-8 rounded-[10px] bg-[#edf4ee]" />
+      </div>
+    </div>
   );
 }
 
@@ -845,6 +1031,7 @@ function PhaseHero() {
 }
 
 function PhaseWhite() {
+  // Phase 03: readable base.
   return (
     <section className="phase-white pointer-events-none absolute inset-0 z-20 overflow-hidden">
       <div className="split-left-half absolute inset-y-0 left-0 w-1/2 bg-[#fffdf8]" />
@@ -852,7 +1039,7 @@ function PhaseWhite() {
 
       <div className="absolute inset-0 bg-[#fffdf8]" />
       <div className="center-stage-copy white-copy-mask absolute left-1/2 top-[38%] z-10 w-[min(90vw,760px)] -translate-x-1/2 -translate-y-1/2 text-center sm:top-[40%]">
-        <PhaseLabel className="text-[#a86d35]">Phase 01 / readable base</PhaseLabel>
+        <PhaseLabel className="text-[#a86d35]">Phase 03 / readable base</PhaseLabel>
         <h2 className="mt-4 font-[var(--font-display)] text-[40px] leading-[0.9] text-[#102f1e] sm:text-[74px] lg:text-[100px]">
           <KineticLine className="white-word">Start ATS-safe,</KineticLine>
           <KineticLine className="white-word color-shift-word">
@@ -886,6 +1073,7 @@ function PhaseGreen({
 }) {
   const activeTemplate = templateImageCards[activeTemplateIndex];
 
+  // Phase 04: compose.
   return (
     <section className="phase-green pointer-events-none absolute inset-0 z-30 overflow-hidden">
       <div className="green-panel absolute inset-0 overflow-hidden bg-[#102f1e] text-white">
@@ -896,7 +1084,7 @@ function PhaseGreen({
 
         <div className="center-stage-copy green-title-wrap absolute left-1/2 top-[16%] z-10 w-[min(92vw,820px)] -translate-x-1/2 -translate-y-1/2 text-center sm:top-[20%] lg:top-[18%]">
           <p className="green-copy-mask text-xs font-black uppercase tracking-[0.18em] text-[#e0b15b] sm:text-sm">
-            Phase 02 / compose
+            Phase 04 / compose
           </p>
           <h2 className="mt-3 font-[var(--font-display)] text-[clamp(2.25rem,10vw,5.75rem)] leading-[0.88] sm:mt-4">
             <KineticLine className="green-word">Move sections</KineticLine>
@@ -1029,6 +1217,7 @@ function MiniCvMock({ accent, title }: { accent: string; title: string }) {
 }
 
 function PhaseSplit() {
+  // Phase 05: apply.
   return (
     <section className="phase-split pointer-events-none absolute inset-0 z-40 overflow-hidden">
       <div className="width-reveal-shell absolute inset-0 z-0 overflow-hidden bg-transparent">
@@ -1039,7 +1228,7 @@ function PhaseSplit() {
       <div className="phase-three-content phase-three-layout pointer-events-none absolute inset-0 z-10 flex max-h-[calc(100dvh-0rem)] flex-col justify-center gap-[clamp(1.25rem,4vh,3.5rem)] px-4 pb-8 pt-20 sm:px-6 sm:pt-24 md:grid md:grid-cols-2 md:gap-0 md:p-0">
         <div className="phase-three-left-half flex justify-center md:h-full md:items-center md:justify-end md:pl-10 md:pr-[clamp(2rem,6vw,5rem)]">
           <div className="width-reveal-copy w-[min(100%,31rem)]">
-            <PhaseLabel>Phase 03 / apply</PhaseLabel>
+            <PhaseLabel>Phase 05 / apply</PhaseLabel>
             <h2 className="mt-4 max-w-[8.5ch] font-[var(--font-display)] text-[clamp(2.55rem,7vw,5.35rem)] leading-[0.9] text-[#102f1e] sm:mt-5">
               <KineticLine className="width-word">Draft</KineticLine>
               <KineticLine className="width-word">for the</KineticLine>
@@ -1075,13 +1264,14 @@ function PhaseSplit() {
 }
 
 function PhaseDepth() {
+  // Phase 06: template depth.
   return (
     <section className="phase-depth pointer-events-none absolute inset-0 z-50 overflow-hidden bg-[#111814] text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(57,168,107,0.24),transparent_24%),radial-gradient(circle_at_70%_20%,rgba(224,177,91,0.2),transparent_20%),linear-gradient(135deg,#111814,#1b2b21_52%,#070907)]" />
       <div className="absolute inset-0 backdrop-blur-[1px]" />
 
       <div className="center-stage-copy depth-copy-mask absolute left-1/2 top-[22%] z-20 w-[min(92vw,780px)] -translate-x-1/2 text-center">
-        <PhaseLabel className="text-[#e0b15b]">Phase 04 / template depth</PhaseLabel>
+        <PhaseLabel className="text-[#e0b15b]">Phase 06 / template depth</PhaseLabel>
         <h2 className="mt-4 font-[var(--font-display)] text-[42px] leading-[0.9] sm:text-[76px] lg:text-[100px]">
           <KineticLine className="depth-word">Pull the right CV</KineticLine>
           <KineticLine className="depth-word text-[#e0b15b]">
